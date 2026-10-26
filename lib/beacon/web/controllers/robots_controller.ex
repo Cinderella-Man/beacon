@@ -8,7 +8,7 @@ defmodule Beacon.Web.RobotsController do
     conn
     |> accepts(["txt"])
     |> put_view(Beacon.Web.RobotsTxt)
-    |> put_resp_content_type("text/txt")
+    |> put_resp_content_type("text/plain")
     |> put_resp_header("cache-control", "public max-age=300")
     |> render(:robots, sitemap_url: get_sitemap_url(conn, site))
   end

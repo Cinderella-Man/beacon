@@ -24,6 +24,7 @@ defmodule Beacon.Web.SitemapController do
 
   defp get_sitemap_urls(conn) do
     Beacon.Registry.running_sites()
+    |> Enum.filter(&beacon_router?/1)
     |> Enum.map(fn site ->
       routes_module = Beacon.Loader.fetch_routes_module(site)
       Beacon.apply_mfa(site, routes_module, :beacon_sitemap_url, [conn])
@@ -32,11 +33,18 @@ defmodule Beacon.Web.SitemapController do
     |> Enum.sort()
   end
 
+  # a site can only be mounted by a router that uses `Beacon.Router`,
+  # so sites configured with any other router have no sitemap to list
+  defp beacon_router?(site) do
+    %{router: router} = Beacon.Config.fetch!(site)
+    Code.ensure_loaded?(router) and function_exported?(router, :__beacon_scoped_prefix_for_site__, 1)
+  end
+
   defp get_pages(conn, site) do
     routes_module = Beacon.Loader.fetch_routes_module(site)
 
     site
-    |> Beacon.Content.list_published_pages()
+    |> Beacon.Content.list_published_pages(per_page: :infinity)
     |> Enum.map(fn page ->
       %{
         loc: Beacon.apply_mfa(site, routes_module, :beacon_page_url, [conn, page]),
