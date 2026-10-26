@@ -177,5 +177,8 @@ Enum.each(
   &Beacon.BeaconTest.Repo.delete_all/1
 )
 
-ExUnit.start(exclude: [:skip])
+Code.require_file("support/line_buffered_io.exs", __DIR__)
+Beacon.BeaconTest.LineBufferedIO.install()
+
+ExUnit.start(exclude: [:skip], max_cases: 2)
 Ecto.Adapters.SQL.Sandbox.mode(Beacon.BeaconTest.Repo, :manual)
