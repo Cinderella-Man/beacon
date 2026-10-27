@@ -210,11 +210,11 @@ defmodule Beacon.Router do
 
   """
   defmacro beacon_sitemap_index(path_with_filename) do
+    # call Phoenix.Router fully qualified: an import here would replace the
+    # caller's own Phoenix.Router import for the rest of the enclosing scope
     quote bind_quoted: binding(), location: :keep, generated: true do
-      import Phoenix.Router, only: [scope: 3, get: 4]
-
-      scope "/", alias: false, as: false do
-        get path_with_filename, Beacon.Web.SitemapController, :index, as: :beacon_sitemap
+      Phoenix.Router.scope "/", alias: false, as: false do
+        Phoenix.Router.get(path_with_filename, Beacon.Web.SitemapController, :index, as: :beacon_sitemap)
       end
     end
   end
