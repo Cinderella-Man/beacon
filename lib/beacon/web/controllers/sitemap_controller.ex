@@ -46,10 +46,18 @@ defmodule Beacon.Web.SitemapController do
     site
     |> Beacon.Content.list_published_pages(per_page: :infinity)
     |> Enum.map(fn page ->
+      url = Beacon.apply_mfa(site, routes_module, :beacon_page_url, [conn, page])
+
       %{
-        loc: Beacon.apply_mfa(site, routes_module, :beacon_page_url, [conn, page]),
+        loc: encode_control_characters(url),
         lastmod: DateTime.to_iso8601(page.updated_at)
       }
     end)
+  end
+
+  # a page path may contain control characters, which URLs do not allow
+  # and most of which XML cannot represent at all, so they are percent-encoded
+  defp encode_control_characters(url) do
+    URI.encode(url, &(&1 > 0x1F and &1 != 0x7F))
   end
 end
